@@ -1,4 +1,4 @@
 interface:
   display_name: "GitHub Treasure"
-  short_description: "每日挖掘 5–6 个实用开源项目，生成可直接发布的中文 X 帖子与截图描述"
-  default_prompt: "使用 $github-treasure，寻找今天值得分享的 5–6 个 GitHub 开源项目，按规定格式输出中文 X 帖子和截图描述。"
+  short_description: "每日挖掘 5–6 个实用开源项目，生成中文 X 帖子并逐条附上真实项目截图"
+  default_prompt: "使用 $github-treasure，寻找今天值得分享的 5–6 个 GitHub 开源项目，按规定格式输出中文 X 帖子，每条后直接展示真实项目截图。"
