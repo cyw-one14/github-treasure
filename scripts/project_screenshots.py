@@ -251,6 +251,9 @@ def main():
             raise MissingDependency("Install required image validation: python -m pip install Pillow") from exc
         output = args.output_dir.resolve()
         output.mkdir(parents=True, exist_ok=True)
+        marker = output / ".github-treasure-work"
+        if not marker.exists() and not any(output.iterdir()):
+            marker.write_text("GitHub Treasure generated work files\n", encoding="utf-8")
     except (OSError, ValueError, TypeError, MissingDependency) as exc:
         print(str(exc), file=sys.stderr)
         return 2
