@@ -68,13 +68,13 @@ python -m playwright install chromium
 
 ## 整理与清理
 
-逐张检查后，创建临时 `posts.json` 数组，每项为 `repo`、`text` 和 `visually_reviewed: true`。`text` 为完整四段文案，第四段必须是对应的 `🔗 https://github.com/owner/repo`。未实际看图时不得写入已检查标志。
+逐张检查后，创建临时 `posts.json` 数组，每项为 `repo`、`text` 和 `visually_reviewed: true`。`text` 为自然分段的完整分享文案，末尾单独一行保留对应的 `🔗 https://github.com/owner/repo`。未实际看图时不得写入已检查标志。
 
 ```text
 python scripts/finalize_output.py --posts posts.json --work-dir .work/batch-001 --output-dir output/2026-10-18
 ```
 
-整理器验证 5–6 条独立文案、80–150 字、图文对应和真实文件后，一次产出 `posts.txt` 与 `images/`；现有成品目录不覆盖，重复执行使用新批次名。只清除有本工具归属标记的工作目录中已知生成文件，不删除陌生文件或输入素材。缺图、未看图或文案不合格时停止整理并保留工作文件供修复。
+整理器验证 5–6 条独立且非空的文案、末尾仓库链接、图文对应和真实文件后，一次产出 `posts.txt` 与 `images/`；不限制文案的段落数、开头标点或字数，语气和信息质量由发送前检查把关。现有成品目录不覆盖，重复执行使用新批次名。只清除有本工具归属标记的工作目录中已知生成文件，不删除陌生文件或输入素材。缺图、未看图或文案不合格时停止整理并保留工作文件供修复。
 
 确认最终目录完整后，删除本次临时输入 JSON 及空工作目录；测试素材放在 `TemporaryDirectory` 中自动释放。保留 Skill 源码、测试代码和可复用依赖环境。最终图片必须引用 `output/` 内的绝对路径，不能引用随后会清除的工作文件。已清理工作文件后重跑同一任务会重新获取图片。
 

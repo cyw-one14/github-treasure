@@ -52,6 +52,41 @@ class FinalizeTests(unittest.TestCase):
         self.assertFalse(self.output.exists())
         self.assertTrue((self.work / "manifest.json").is_file())
 
+    def test_conversational_posts_keep_varied_layouts_and_lengths(self):
+        bodies = [
+            "兄弟们，复制过的链接被覆盖了，你们都怎么找回来？这个工具能搜索历史记录。",
+            "手机和电脑传文件，你们用什么？\n\n两端装好就能在局域网互传。",
+            "同一个问题怎么比较几个模型的回答？\n这个工作台支持多模型对话。\n\n云端模型需要自行配置。",
+            "电子书格式太多怎么办？\n\n把书导入同一个书架。\n\n能高亮、记笔记。\n\n也能导出笔记。",
+            "字幕和配音怎么一起处理？" + "可以按阶段校对字幕，再继续处理。" * 15,
+            "旧笔记怎么连到新文章里？\n\n可以直接关联具体段落。",
+        ]
+        for post, body in zip(self.posts, bodies):
+            post["text"] = body + f"\n\n🔗 https://github.com/{post['repo']}"
+        finalizer.finalize(self.posts, self.work, self.output)
+        delivered = (self.output / "posts.txt").read_text(encoding="utf-8")
+        for post in self.posts:
+            self.assertIn(post["text"], delivered)
+
+    def test_missing_or_mismatched_repository_link_publishes_nothing(self):
+        for text in (
+            "兄弟们，你们平时怎么整理文件？",
+            "兄弟们，你们平时怎么整理文件？\n🔗 https://github.com/example/wrong",
+            "兄弟们，你们平时怎么整理文件？ 🔗 https://github.com/example/tool0",
+        ):
+            with self.subTest(text=text):
+                self.posts[0]["text"] = text
+                with self.assertRaisesRegex(ValueError, "own GitHub URL"):
+                    finalizer.finalize(self.posts, self.work, self.output)
+                self.assertFalse(self.output.exists())
+                self.assertTrue((self.work / "manifest.json").is_file())
+
+    def test_link_without_share_text_publishes_nothing(self):
+        self.posts[0]["text"] = "\n\n🔗 https://github.com/example/tool0"
+        with self.assertRaises(ValueError):
+            finalizer.finalize(self.posts, self.work, self.output)
+        self.assertFalse(self.output.exists())
+
     def test_unknown_files_and_original_inputs_are_preserved(self):
         note = self.work / "notes--original.png"
         note.write_text("user input")

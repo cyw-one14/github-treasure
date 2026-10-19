@@ -39,12 +39,11 @@ def finalize(posts, work_dir, output_dir):
         with Image.open(image_path) as picture:
             picture.load()
         text = post["text"].strip()
-        parts = text.split("\n\n")
-        if len(parts) != 4 or not parts[0].endswith("！") or parts[3] != f"🔗 https://github.com/{repo}":
-            raise ValueError("Post must have four paragraphs, a hook, and its own GitHub URL")
-        count = len("".join("".join(parts[:3]).split()))
-        if not 80 <= count <= 150:
-            raise ValueError(f"Post {number} has {count} characters; expected 80–150")
+        lines = text.splitlines()
+        if len(lines) < 2 or lines[-1] != f"🔗 https://github.com/{repo}":
+            raise ValueError("Post must end with its own GitHub URL on a separate line")
+        if not "".join(lines[:-1]).strip():
+            raise ValueError("Post must include share text before its GitHub URL")
         prepared.append((number, text, image_path))
     output_dir.parent.mkdir(parents=True, exist_ok=True)
     # Publish only after every entry validates. The temporary directory is always removed.
